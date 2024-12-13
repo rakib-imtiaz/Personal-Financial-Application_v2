@@ -28,9 +28,14 @@ public class UserManager {
         saveUsers();
     }
 
-    public void deleteUser(String username) {
+    public boolean deleteUser(String username) {
+        int initialSize = users.size();
         users.removeIf(user -> user.getUsername().equals(username));
-        saveUsers();
+        boolean wasRemoved = users.size() < initialSize;
+        if (wasRemoved) {
+            saveUsers();
+        }
+        return wasRemoved;
     }
 
     public User getUser(String username) {
@@ -73,5 +78,22 @@ public class UserManager {
             System.err.println("Error loading users: " + e.getMessage());
             users = new ArrayList<>();
         }
+    }
+
+    public boolean addUser(String username, String password, String userType) {
+        if (getUser(username) != null) {
+            return false;
+        }
+        
+        User newUser;
+        if (userType.equals("ADMIN")) {
+            newUser = new AdminUser(username, password);
+        } else {
+            newUser = new RegularUser(username, password);
+        }
+        
+        users.add(newUser);
+        saveUsers();
+        return true;
     }
 }
